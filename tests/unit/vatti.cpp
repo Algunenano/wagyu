@@ -402,3 +402,215 @@ TEST_CASE("simple test of entire vatti -- all processing as int32_t") {
 
     CHECK(solution[1][0].size() == 11);
 }
+
+TEST_CASE("Intersect with self (big)") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({  0,  0 });
+	ring0_0.push_back({  0, 10 });
+	ring0_0.push_back({ 10, 10 });
+	ring0_0.push_back({ 10,  0 });
+	ring0_0.push_back({  0,  0 });
+
+    mapbox::geometry::polygon<std::int64_t> pol0;
+    pol0.push_back(ring0_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
+
+TEST_CASE("Intersect with self (big, rings)") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({  0,  0 });
+	ring0_0.push_back({  0, 10 });
+	ring0_0.push_back({ 10, 10 });
+	ring0_0.push_back({ 10,  0 });
+	ring0_0.push_back({  0,  0 });
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_1;
+    ring0_1.push_back({  2,  2 });
+	ring0_1.push_back({  2,  8 });
+	ring0_1.push_back({  8,  8 });
+	ring0_1.push_back({  8,  2 });
+	ring0_1.push_back({  2,  2 });
+
+    mapbox::geometry::polygon<std::int64_t> pol0;
+    pol0.push_back(ring0_0);
+	pol0.push_back(ring0_1);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 2);
+    REQUIRE(solution[0][0].size() == 5);
+	REQUIRE(solution[0][1].size() == 5);
+}
+
+TEST_CASE("Intersect with self (small)") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({ 1252, 1904 });
+	ring0_0.push_back({ 1253, 1905 });
+	ring0_0.push_back({ 1253, 1906 });
+	ring0_0.push_back({ 1251, 1904 });
+	ring0_0.push_back({ 1252, 1904 });
+
+    mapbox::geometry::polygon<std::int64_t> pol0;
+	pol0.push_back(ring0_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
+
+TEST_CASE("Intersect with self (small, negative)") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({ -1252, -1904 });
+	ring0_0.push_back({ -1253, -1905 });
+	ring0_0.push_back({ -1253, -1906 });
+	ring0_0.push_back({ -1251, -1904 });
+	ring0_0.push_back({ -1252, -1904 });
+
+    mapbox::geometry::polygon<std::int64_t> pol0;
+	pol0.push_back(ring0_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+    wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
+
+TEST_CASE("Intersection bbox small") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({ 2, 4 });
+	ring0_0.push_back({ 3, 5 });
+	ring0_0.push_back({ 3, 6 });
+	ring0_0.push_back({ 1, 4 });
+	ring0_0.push_back({ 2, 4 });
+
+	mapbox::geometry::polygon<std::int64_t> pol0;
+	pol0.push_back(ring0_0);
+
+    mapbox::geometry::linear_ring<std::int64_t> ring1_0;
+    ring1_0.push_back({ 1, 4 });
+	ring1_0.push_back({ 3, 4 });
+	ring1_0.push_back({ 3, 6 });
+	ring1_0.push_back({ 1, 6 });
+	ring1_0.push_back({ 1, 4 });
+
+	mapbox::geometry::polygon<std::int64_t> pol1;
+	pol1.push_back(ring1_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+	wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+	wagyu.add_polygon(pol1, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
+
+TEST_CASE("Intersection bbox translated") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({ 1252, 1904 });
+	ring0_0.push_back({ 1253, 1905 });
+	ring0_0.push_back({ 1253, 1906 });
+	ring0_0.push_back({ 1251, 1904 });
+	ring0_0.push_back({ 1252, 1904 });
+	mapbox::geometry::polygon<std::int64_t> pol0;
+	pol0.push_back(ring0_0);
+
+    mapbox::geometry::linear_ring<std::int64_t> ring1_0;
+    ring1_0.push_back({ 1251, 1904 });
+	ring1_0.push_back({ 1253, 1904 });
+	ring1_0.push_back({ 1253, 1906 });
+	ring1_0.push_back({ 1251, 1906 });
+	ring1_0.push_back({ 1251, 1904 });
+	mapbox::geometry::polygon<std::int64_t> pol1;
+	pol1.push_back(ring1_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+
+	wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+	wagyu.add_polygon(pol1, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
+
+TEST_CASE("Intersection tile") {
+
+    mapbox::geometry::linear_ring<std::int64_t> ring0_0;
+    ring0_0.push_back({ 1252, 1904 });
+	ring0_0.push_back({ 1253, 1905 });
+	ring0_0.push_back({ 1253, 1906 });
+	ring0_0.push_back({ 1251, 1904 });
+	ring0_0.push_back({ 1252, 1904 });
+	mapbox::geometry::polygon<std::int64_t> pol0;
+	pol0.push_back(ring0_0);
+
+    mapbox::geometry::linear_ring<std::int64_t> ring1_0;
+	ring1_0.push_back({    0,    0 });
+	ring1_0.push_back({    0, 4096 });
+	ring1_0.push_back({ 4096, 4096 });
+	ring1_0.push_back({ 4096,   0 });
+	ring1_0.push_back({    0,   0 });
+
+	mapbox::geometry::polygon<std::int64_t> pol1;
+	pol1.push_back(ring1_0);
+
+    mapbox::geometry::wagyu::wagyu<std::int64_t> wagyu;
+	wagyu.add_polygon(pol0, mapbox::geometry::wagyu::polygon_type::polygon_type_subject);
+	wagyu.add_polygon(pol1, mapbox::geometry::wagyu::polygon_type::polygon_type_clip);
+
+    mapbox::geometry::multi_polygon<std::int64_t> solution;
+    wagyu.execute(mapbox::geometry::wagyu::clip_type_intersection, solution, mapbox::geometry::wagyu::fill_type_even_odd,
+                  mapbox::geometry::wagyu::fill_type_even_odd);
+
+    REQUIRE(solution.size() == 1);
+    REQUIRE(solution[0].size() == 1);
+    REQUIRE(solution[0][0].size() == 5);
+}
