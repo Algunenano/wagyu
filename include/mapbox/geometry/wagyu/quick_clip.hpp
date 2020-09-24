@@ -64,21 +64,22 @@ bool inside(mapbox::geometry::point<T> const& p, size_t edge, mapbox::geometry::
 }
 
 template <typename T>
-mapbox::geometry::linear_ring<T> quick_lr_clip(mapbox::geometry::linear_ring<T> const& ring,
+mapbox::geometry::linear_ring<T> quick_lr_clip(mapbox::geometry::linear_ring<T>& ring,
                                                mapbox::geometry::box<T> const& b) {
-    mapbox::geometry::linear_ring<T> out = ring;
+    mapbox::geometry::linear_ring<T>& out = ring;
 
     for (size_t edge = 0; edge < 4; edge++) {
         if (out.size() > 0) {
             mapbox::geometry::linear_ring<T> in = out;
             size_t prev = in.size() - 1;
-            out.resize(0);
+            bool prev_inside = inside(in[prev], edge, b);
+            out.clear();
 
             for (size_t e = 0; e < in.size(); e++) {
                 mapbox::geometry::point<T>& E = in[e];
 
                 if (inside(E, edge, b)) {
-                    if (!inside(in[prev], edge, b)) {
+                    if (!prev_inside) {
                         out.push_back(intersect(in[prev], E, edge, b));
                     }
 
@@ -87,8 +88,12 @@ mapbox::geometry::linear_ring<T> quick_lr_clip(mapbox::geometry::linear_ring<T> 
                         e2++;
                     out.insert(out.end(), &in[e], &in[e + e2]);
                     e += e2 - 1;
-                } else if (inside(in[prev], edge, b)) {
-                    out.push_back(intersect(in[prev], E, edge, b));
+                    prev_inside = true;
+                } else {
+                    if (prev_inside) {
+                        out.push_back(intersect(in[prev], E, edge, b));
+                    }
+                    prev_inside = false;
                 }
 
                 prev = e;
